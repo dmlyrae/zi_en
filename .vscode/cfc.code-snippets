@@ -1,0 +1,25 @@
+{
+	"Create custom react function component": {
+		"scope": "javascript,typescript,javascriptreact",
+		"prefix": "cfc",
+		"body": [
+			"import React from \"react\";",
+			"import ${TM_FILENAME_BASE}Styles from './${TM_FILENAME_BASE}.module.css';",
+			"",
+			"function ${TM_FILENAME_BASE}() {",
+			"\tconst { } = props;",
+			"",
+			"\treturn (",
+			"\t\t<div ",
+        	"\t\t\tclassName={${TM_FILENAME_BASE}Styles.root}",
+    		"\t\t>",
+			"\t\t\t",
+			"\t\t\t",
+    		"\t\t</div>",
+			")}",
+			"",
+			"export default ${TM_FILENAME_BASE}",
+		],
+		"description": "React-компонент по умолчанию."
+	}
+}
