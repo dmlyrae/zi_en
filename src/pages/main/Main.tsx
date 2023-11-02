@@ -92,7 +92,7 @@ export function Main () {
 				const cardsTags = new Set();
 				responseCards.forEach( (card: TCard) => {
 					if (!("source" in card)) return;
-					const cardName = card.source;
+					const cardName = card.translate;
 					const learnLevel = Number(localStorage.getItem(cardName));
 					card.learnLevel = Number.isNaN(learnLevel) ? 0 : learnLevel;
 					if (Array.isArray(card?.tags)) {
@@ -100,7 +100,7 @@ export function Main () {
 					}
 				})
 				responseCards.sort( (a, b) => {
-					return (b.learnLevel ?? 0) - (a.learnLevel ?? 0);
+					return (a.learnLevel ?? 0) - (b.learnLevel ?? 0);
 				})
 			}
 			setCards(responseCards);

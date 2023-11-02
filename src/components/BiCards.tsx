@@ -100,7 +100,10 @@ export function BiCards (props: {
 			</form>
 		</div>
 		<div 
-			onClick={onClickHandler} 
+			onClick={(e: MouseEvent<HTMLDivElement>) => {
+				setAnswer(["", -1])
+				onClickHandler(e);
+			}} 
 			style={{ 
 				cursor: 'pointer', 
 				borderRadius: 10 ,
