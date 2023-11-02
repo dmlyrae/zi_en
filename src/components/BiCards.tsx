@@ -1,5 +1,5 @@
-import { ChangeEventHandler, MouseEventHandler } from "react";
-import { TCard } from "../types/TCards";
+import { ChangeEventHandler, Fragment, MouseEventHandler, MouseEvent, useState } from "react";
+import { TCard, TExample } from "../types/TCards";
 import { Button, Col, Row } from "react-bootstrap";
 import { Back, CaretLeft, CaretRight, Forward, SkipBackward, SkipBackwardBtn, SkipForward } from "react-bootstrap-icons";
 
@@ -18,23 +18,51 @@ export function BiCards (props: {
 	const { toggleFullCards, reverseCards, 
 		onClickHandler, setCurrentCard,
 		fullCard, currentCard, length,
-		card, englishFirst,
+		card, englishFirst, 
 	} = props;
 
-	const plus = () => {
+	const [ answer, setAnswer ] = useState<[string, number]>(["", -1]);
+
+	const plus = (e: MouseEvent) => {
+		e.stopPropagation()
+		setAnswer( _ => ["", -1]);
 		setCurrentCard( (prev:number) => (prev + 1) % length );
 	}
 
-	const minus = () => {
+	const minus = (e: MouseEvent) => {
+		e.stopPropagation()
+		setAnswer( _ => ["", -1]);
 		setCurrentCard( (prev:number) => (prev - 1) % length );
 	}
 
-	const goToEnd = () => {
+	const goToEnd = (e: MouseEvent) => {
+		e.stopPropagation()
+		setAnswer( _ => ["", -1]);
 		setCurrentCard( length - 1 );
 	}
 
-	const goToStart = () => {
+	const goToStart = (e: MouseEvent) => {
+		e.stopPropagation()
+		setAnswer( _ => ["", -1]);
 		setCurrentCard( 0 );
+	}
+
+	const checkVariant = function(variant: string, index: number) {
+		return function(e: MouseEvent) {
+			e.stopPropagation()
+			if (answer[0]) {
+				return;
+			}
+			if (variant == card.translate) {
+				const currentLevel = Number(localStorage.getItem(variant));
+				if (Number.isNaN(currentLevel)) {
+					localStorage.setItem(variant, "1");
+				} else {
+					localStorage.setItem(variant, String(currentLevel + 1));
+				}
+			}
+			setAnswer([variant, index]);
+		}
 	}
 
 	return (
@@ -87,20 +115,81 @@ export function BiCards (props: {
 			}
 			{
 				card.examples &&
-					card.examples.map((example: any, index: number) => {
+					card.examples.map((example: TExample, index: number) => {
 						return (
-						<Row 
-							key={index} 
+							<Fragment
+								key={index}
+							>
+								<Row 
+									key={index} 
+									color="success"
+									style={{
+										textAlign: "center",
+									}}
+								>
+									<Col 
+										md={{ span: 6, offset: 3 }}
+										color="success"
+									>
+										{example.sentence}
+									</Col>
+								</Row>
+								{
+									example.translate && (
+											<Row 
+												key={index} 
+												color="secondary"
+												style={{
+													textAlign: "center",
+												}}
+											>
+											<Col md={{ span: 6, offset: 3 }}>
+												{example.translate}
+											</Col>
+										</Row>
+									)
+								}
+							</Fragment>
+					)} )
+			}
+			{
+				card.variants && !fullCard && (
+					<Row 
+						color="success"
+						style={{
+						textAlign: "center",
+						}}
+					>
+				{
+					card.variants.map( (variant, i) => (
+						<Col 
+							md={{ span: 6 }}
+							color="success"
 							style={{
-								color:'Green',
-								textAlign: "center",
+								display: "flex",
+								justifyContent: "center",
+								alignItems: "center",
 							}}
 						>
-							<Col md={{ span: 6, offset: 3 }}>
-								{example}
-							</Col>
-						</Row>
-					)} )
+							<Button
+								onClick={checkVariant(variant, i)}
+								variant={
+									(answer[1] == i ? answer[0] === card.translate ? "success" : "danger" : "primary")
+								}
+								style={{
+									width: "100%",
+									margin: "1em",
+								}}
+							>
+								{
+									variant
+								}
+							</Button>
+						</Col>
+					))
+				}
+					</Row>
+				)
 			}
 		</div>
 		<div className="text-muted flex gap-2">

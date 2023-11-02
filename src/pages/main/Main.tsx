@@ -1,36 +1,52 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import cl from "./Main.css";
 import { TCard, TCardJson } from "../../types/TCards";
-import menu from "../../data/menu.json";
-import business from "../../data/1.json";
-import mood from "../../data/2.json";
-import newWords from "../../data/3.json";
-import conditional from "../../data/4.json";
 import { BiCards } from "../../components/BiCards";
 import { NewWords } from "../../components/NewWords";
+import axios from "axios";
 
 export function Main () {
 
 	const [ isMenuOpen, setIsMenuOpen ] = useState<boolean>(false);
 	const [ currentCard, setCurrentCard ] = useState<number>(0);
-	const [ fullCard, setFullCard ] = useState<boolean>(true);
+	const [ fullCard, setFullCard ] = useState<boolean>(false);
 	const [ englishFirst, setEnglishFirst ] = useState<boolean>(true);
-	const [ cards, setCards ] = useState<TCard[]>(business.items);
+	const [ tags, setTags ] = useState<string[]>([]);
+	const [ cards, setCards ] = useState<TCard[]>([]);
 	const [ mode, setMode ] = useState<string>("cards");
 
-	// const changeRootState = (object) => {
-	// 	this.setState(object);
-	// }
+	const allWords = useMemo(() => {
+		if (!Array.isArray(cards)) return ["1", "2", "3", "4"];
+		return cards.map( c => c.translate );
+	}, [ cards ])
+
+	const returnVariants = (source: string) => {
+		const variants = new Set<string>();
+		variants.add(source);
+		let counter = 0;
+		let boundaryCounter = 0;
+		while (counter < 3 && boundaryCounter < 100) {
+			const candidate = allWords[Math.floor(Math.random() * allWords.length)];
+			if (!variants.has(candidate)) {
+				variants.add(candidate);
+				counter++;
+			}
+			boundaryCounter++;
+		}
+		return Array.from(variants)
+	}
 
 	const card = useMemo(() => {
-		return cards[currentCard] ?? cards [0] ?? {
+		const result = cards[currentCard] ?? cards[0] ?? {
 			id: undefined,
 			source: "",
 			translate: "",
 			examples: undefined,
-			learnLevel: undefined
+			learnLevel: undefined,
 		}
-	}, [ currentCard ])
+		result.variants = returnVariants(result.translate);
+		return result;
+	}, [ currentCard, cards ])
 
 	const onClickHandler = () => {
 		setCurrentCard( prev => (prev + 1) % cards.length );
@@ -51,24 +67,8 @@ export function Main () {
 		})
 	}
 
-	const onSubjectClick = (id: number) => {
+	const onSubjectClick = (tag: string) => {
 		let cards!:TCardJson;
-		switch (id) {
-		case 1:
-			cards = business;
-			break;
-		case 2:
-			cards = mood;
-			break;
-		case 3:
-			cards = newWords;
-			break;
-		case 4:
-			cards = conditional;
-			break;
-		default:
-			cards = business;
-		}
 		setIsMenuOpen(false);
 		setCurrentCard(0);
 		setFullCard(true);
@@ -83,20 +83,31 @@ export function Main () {
 		setEnglishFirst(true);
 	}
 
-	const onMoodIdiomsClick = () => {
-		reset();
-		setCards(mood.items)
-	}
-
-	const onNewWordsClick = () => {
-		reset();
-		setCards(newWords.items)
-	}
-
-	const onConditionsClick = () => {
-		reset();
-		setCards(conditional.items)
-	}
+	useEffect(() => {
+		axios.get("https://raw.githubusercontent.com/dmlyrae/english_cards/main/main.json",
+		{ responseType: "json" })
+		.then(function (response) {
+			const responseCards = response.data as TCard[];
+			if (Array.isArray(responseCards)) {
+				const cardsTags = new Set();
+				responseCards.forEach( (card: TCard) => {
+					if (!("source" in card)) return;
+					const cardName = card.source;
+					const learnLevel = Number(localStorage.getItem(cardName));
+					card.learnLevel = Number.isNaN(learnLevel) ? 0 : learnLevel;
+					if (Array.isArray(card?.tags)) {
+						card.tags.forEach( tag => cardsTags.add(tag) );
+					}
+				})
+				responseCards.sort( (a, b) => {
+					return (b.learnLevel ?? 0) - (a.learnLevel ?? 0);
+				})
+			}
+			setCards(responseCards);
+			setCurrentCard(0)
+			console.log(responseCards)
+		});
+	}, [])
 
 	return (
 	<div className="App">
@@ -120,19 +131,21 @@ export function Main () {
 						Темы
 					</h4>
 					<ul className="list-unstyled">
-						{menu.source.map((item: any) => (
-						<li key={item.id}>
-							<a
-							onClick={() => {
-								onSubjectClick(item.id);
-							}}
-							href="#"
-							className="text-white"
-							>
-							{item.title}
-							</a>
-						</li>
-						))}
+						{
+							tags.map((tag: string, i) => (
+							<li key={i}>
+								<a
+								onClick={() => {
+									onSubjectClick(tag);
+								}}
+								href="#"
+								className="text-white"
+								>
+								{tag}
+								</a>
+							</li>
+							))
+						}
 					</ul>
 				</div>
 			  </div>
