@@ -16,7 +16,7 @@ export function BiCards (props: {
 }
 ) {
 	const { toggleFullCards, reverseCards, 
-		onClickHandler, setCurrentCard,
+		setCurrentCard,
 		fullCard, currentCard, length,
 		card, englishFirst, 
 	} = props;
@@ -99,102 +99,177 @@ export function BiCards (props: {
 				</div>
 			</form>
 		</div>
-		<div 
+		<Row 
 			onClick={(e: MouseEvent<HTMLDivElement>) => {
 				setAnswer(["", -1])
-				onClickHandler(e);
 			}} 
 			style={{ 
 				cursor: 'pointer', 
 				borderRadius: 10 ,
 				marginTop: "1em",
-				marginBottom: "1em"
+				marginBottom: "1em",
 			}} 
-			className="container bg-light box-shadow py-5"
 		>
-			<h1 className="jumbotron-heading">{card.source}</h1>
-			{fullCard &&
-				<p className="lead text-muted">{card.translate}</p>
-			}
-			{
-				card.examples &&
-					card.examples.map((example: TExample, index: number) => {
-						return (
-							<Fragment
-								key={index}
-							>
-								<Row 
-									key={index} 
-									color="success"
-									style={{
-										textAlign: "center",
-									}}
-								>
-									<Col 
-										md={{ span: 6, offset: 3 }}
-										color="success"
+			<Col
+				onClick={minus} 
+				md={{
+					span: 0,
+				}}
+				sm={{
+					span: 1,
+				}}
+				className="md-p-5 sm-p-1"
+			>
+				<div
+					className={`d-flex justify-content-center align-items-center h-full 
+						flex-row bg-info bg-info box-shadow md-p-5 sm-p-1 rounded
+						hover-bg-opacity-80
+					`}
+					style={{
+						height: "100%"
+					}}
+				>
+					<CaretLeft 
+						size={"3em"}
+						color="white"
+					/>
+				</div>
+			</Col>
+			<Col
+				md={{
+					span: 10,
+					offset: 0,
+				}}
+				className="container bg-light box-shadow py-5"
+			>
+					<h1 className="jumbotron-heading">{card.source}</h1>
+					{fullCard &&
+						<p className="lead text-muted">{card.translate}</p>
+					}
+					{
+						card.examples &&
+							card.examples.map((example: TExample, index: number) => {
+								return (
+									<Fragment
+										key={index}
 									>
-										{example.sentence}
-									</Col>
-								</Row>
-								{
-									example.translate && (
-											<Row 
-												key={index} 
-												color="secondary"
-												style={{
-													textAlign: "center",
-												}}
+										<Row 
+											key={index} 
+											color="success"
+											style={{
+												textAlign: "center",
+											}}
+										>
+											<Col 
+												md={{ span: 6, offset: 3 }}
+												color="success"
 											>
-											<Col md={{ span: 6, offset: 3 }}>
-												{example.translate}
+												{example.sentence}
 											</Col>
 										</Row>
-									)
-								}
-							</Fragment>
-					)} )
-			}
-			{
-				card.variants && !fullCard && (
-					<Row 
-						color="success"
-						style={{
-						textAlign: "center",
-						}}
-					>
-				{
-					card.variants.map( (variant, i) => (
-						<Col 
-							md={{ span: 6 }}
-							color="success"
-							style={{
-								display: "flex",
-								justifyContent: "center",
-								alignItems: "center",
-							}}
-						>
-							<Button
-								onClick={checkVariant(variant, i)}
-								variant={
-									(answer[1] == i ? answer[0] === card.translate ? "success" : "danger" : "primary")
-								}
+										{
+											fullCard && example.translate && (
+													<Row 
+														key={index} 
+														color="secondary"
+														style={{
+															textAlign: "center",
+														}}
+													>
+													<Col md={{ span: 6, offset: 3 }}>
+														{example.translate}
+													</Col>
+												</Row>
+											)
+										}
+									</Fragment>
+							)} )
+					}
+					{
+						card.variants && !fullCard && (
+							<Row 
+								color="success"
 								style={{
-									width: "100%",
-									margin: "1em",
+								textAlign: "center",
 								}}
 							>
-								{
-									variant
-								}
-							</Button>
-						</Col>
-					))
-				}
-					</Row>
-				)
-			}
-		</div>
+						{
+							card.variants.map( (variant, i) => (
+								<Col 
+									md={{ span: 6 }}
+									color="success"
+									style={{
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+									}}
+								>
+									<Button
+										onClick={checkVariant(variant, i)}
+										variant={
+											(answer[1] == i ? answer[0] === card.translate ? "success" : "danger" : "primary")
+										}
+										style={{
+											width: "100%",
+											margin: "1em",
+										}}
+									>
+										{
+											variant
+										}
+									</Button>
+								</Col>
+							))
+						}
+							</Row>
+						)
+					}		
+					{
+						answer[0] && (
+							<div className="text-muted flex gap-2 mt-4">
+								<Button 
+									onClick={(e: MouseEvent) => {
+										setAnswer(["", -1]);
+										plus(e);
+									}} 
+									className="fa fa-fast-forward w-100"
+									variant="outline-info"
+									style={{
+										margin: ".5em"
+									}}
+								>
+									{"Next"}
+								</Button>
+							</div>
+						)
+					}
+			</Col>
+			<Col
+				onClick={plus} 
+				md={{
+					span: 1,
+				}}
+				sm={{
+					span: 1,
+				}}
+				className="md-p-5 sm-p-1"
+			>
+				<div
+					className={`d-flex justify-content-center align-items-center h-full 
+						flex-row bg-info bg-info box-shadow md-p-5 sm-p-1 rounded
+						hover-bg-opacity-80
+					`}
+					style={{
+						height: "100%"
+					}}
+				>
+					<CaretRight 
+						size={"3em"}
+						color="white"
+					/>
+				</div>
+			</Col>
+		</Row>
 		<div className="text-muted flex gap-2">
 			<Button 
 				onClick={goToStart} 
@@ -254,6 +329,7 @@ export function BiCards (props: {
 				/>
 			</Button>
 		</div>
+
 	</section>
 	)
 }

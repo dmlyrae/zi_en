@@ -33,7 +33,12 @@ export function Main () {
 			}
 			boundaryCounter++;
 		}
-		return Array.from(variants)
+		let result = Array.from(variants);
+		const rightAnswerIndex = Math.floor(Math.random() * result.length);
+		const answer = result[0];
+		result[0] = result[rightAnswerIndex];
+		result[rightAnswerIndex] = answer;
+		return result;
 	}
 
 	const card = useMemo(() => {
@@ -89,7 +94,7 @@ export function Main () {
 		.then(function (response) {
 			const responseCards = response.data as TCard[];
 			if (Array.isArray(responseCards)) {
-				const cardsTags = new Set();
+				const cardsTags = new Set<string>();
 				responseCards.forEach( (card: TCard) => {
 					if (!("source" in card)) return;
 					const cardName = card.translate;
@@ -99,6 +104,7 @@ export function Main () {
 						card.tags.forEach( tag => cardsTags.add(tag) );
 					}
 				})
+				setTags(Array.from(cardsTags));
 				responseCards.sort( (a, b) => {
 					return (a.learnLevel ?? 0) - (b.learnLevel ?? 0);
 				})
